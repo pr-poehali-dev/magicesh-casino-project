@@ -1,0 +1,13 @@
+{
+  "tests": [
+    {
+      "name": "Register new user",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "register"},
+      "expectedStatus": 200,
+      "expectedBody": {"balance": 50.0},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

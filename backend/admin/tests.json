@@ -1,0 +1,21 @@
+{
+  "tests": [
+    {
+      "name": "Admin stats no password",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 403,
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Admin stats with password",
+      "method": "POST",
+      "path": "/",
+      "headers": {"X-Admin-Password": "2007qwerQ"},
+      "body": {"action": "stats"},
+      "expectedStatus": 200,
+      "expectedBody": {"pending_deposits": 0},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
