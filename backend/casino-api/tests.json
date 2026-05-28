@@ -1,0 +1,21 @@
+{
+  "tests": [
+    {
+      "name": "Health check",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Admin login success",
+      "method": "POST",
+      "path": "/",
+      "headers": {"X-Action": "admin_login"},
+      "body": {"password": "2007qwerQ"},
+      "expectedStatus": 200,
+      "expectedBody": {"access": true},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
