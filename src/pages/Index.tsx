@@ -51,13 +51,13 @@ const BANKS = [
   { id: "ozon", label: "Озон Банк", icon: "🔵" },
 ];
 
-async function apiCall(path: string, method = "GET", body?: object, token?: string) {
+async function apiCall(action: string, body: object = {}, token?: string) {
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
-  const res = await fetch(`${API}${path}`, {
-    method,
+  const res = await fetch(API, {
+    method: "POST",
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: JSON.stringify({ action, ...body }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Ошибка сервера");
@@ -157,7 +157,7 @@ export default function Index() {
   // Загрузить профиль
   const loadMe = useCallback(async (tok: string) => {
     try {
-      const data = await apiCall("/me", "GET", undefined, tok);
+      const data = await apiCall("me", {}, tok);
       setUser(data);
       setBalance(data.balance);
     } catch {
@@ -175,7 +175,7 @@ export default function Index() {
     if (!token) return;
     setBalance(newBal);
     try {
-      await apiCall("/update-balance", "POST", { balance: newBal }, token);
+      await apiCall("update_balance", { balance: newBal }, token);
     } catch (e) { void e; }
   }, [token]);
 
@@ -192,7 +192,7 @@ export default function Index() {
   const handleRegister = async () => {
     setLoading(true);
     try {
-      const data = await apiCall("/register", "POST", {});
+      const data = await apiCall("register");
       setNewCreds({ login: data.login, password: data.password });
       localStorage.setItem("casino_token", data.token);
       setToken(data.token);
@@ -210,7 +210,7 @@ export default function Index() {
     e.preventDefault();
     setLoading(true);
     try {
-      const data = await apiCall("/login", "POST", loginForm);
+      const data = await apiCall("login", loginForm);
       localStorage.setItem("casino_token", data.token);
       setToken(data.token);
       setUser({ id: data.user_id, login: data.login, balance: data.balance, display_name: data.display_name });
@@ -240,7 +240,7 @@ export default function Index() {
     if (isNaN(amt) || amt < 100) { showMsg("Минимальная сумма 100₽", true); return; }
     setLoading(true);
     try {
-      const data = await apiCall("/deposit", "POST", { amount: amt, phone: "" }, token);
+      const data = await apiCall("deposit", { amount: amt }, token);
       setDepositId(data.deposit_id);
       setDepositStep("instruction");
     } catch (e: unknown) {
@@ -259,7 +259,7 @@ export default function Index() {
     if (!withdrawPhone || withdrawPhone.length < 10) { showMsg("Введите номер СБП", true); return; }
     setLoading(true);
     try {
-      await apiCall("/withdraw", "POST", { amount: amt, bank: withdrawBank, sbp_number: withdrawPhone }, token);
+      await apiCall("withdraw", { amount: amt, bank: withdrawBank, sbp_number: withdrawPhone }, token);
       setBalance(b => b - amt);
       setWithdrawStep("done");
     } catch (e: unknown) {
@@ -275,7 +275,7 @@ export default function Index() {
     if (!token) return;
     setLoading(true);
     try {
-      await apiCall("/update-profile", "POST", settingsForm, token);
+      await apiCall("update_profile", settingsForm, token);
       await loadMe(token);
       showMsg("Настройки сохранены!");
     } catch (e: unknown) {
@@ -290,8 +290,8 @@ export default function Index() {
     if (!token) return;
     try {
       const [d, w] = await Promise.all([
-        apiCall("/deposits", "GET", undefined, token),
-        apiCall("/withdrawals", "GET", undefined, token),
+        apiCall("get_deposits", {}, token),
+        apiCall("get_withdrawals", {}, token),
       ]);
       setDeposits(d.deposits || []);
       setWithdrawals(w.withdrawals || []);
@@ -302,8 +302,8 @@ export default function Index() {
   const loadAdminData = async () => {
     try {
       const [d, w] = await Promise.all([
-        fetch(`${API}/admin/deposits?pwd=${ADMIN_PASSWORD}`).then(r => r.json()),
-        fetch(`${API}/admin/withdrawals?pwd=${ADMIN_PASSWORD}`).then(r => r.json()),
+        apiCall("admin_deposits", { password: ADMIN_PASSWORD }),
+        apiCall("admin_withdrawals", { password: ADMIN_PASSWORD }),
       ]);
       setAdminDeposits(d.deposits || []);
       setAdminWithdrawals(w.withdrawals || []);
@@ -311,19 +311,19 @@ export default function Index() {
   };
 
   const adminApproveDeposit = async (id: number) => {
-    await apiCall("/admin/approve-deposit", "POST", { password: ADMIN_PASSWORD, deposit_id: id });
+    await apiCall("admin_approve_deposit", { password: ADMIN_PASSWORD, deposit_id: id });
     loadAdminData();
   };
   const adminRejectDeposit = async (id: number) => {
-    await apiCall("/admin/reject-deposit", "POST", { password: ADMIN_PASSWORD, deposit_id: id });
+    await apiCall("admin_reject_deposit", { password: ADMIN_PASSWORD, deposit_id: id });
     loadAdminData();
   };
   const adminApproveWithdraw = async (id: number) => {
-    await apiCall("/admin/approve-withdrawal", "POST", { password: ADMIN_PASSWORD, withdrawal_id: id });
+    await apiCall("admin_approve_withdrawal", { password: ADMIN_PASSWORD, withdrawal_id: id });
     loadAdminData();
   };
   const adminRejectWithdraw = async (id: number) => {
-    await apiCall("/admin/reject-withdrawal", "POST", { password: ADMIN_PASSWORD, withdrawal_id: id });
+    await apiCall("admin_reject_withdrawal", { password: ADMIN_PASSWORD, withdrawal_id: id });
     loadAdminData();
   };
 

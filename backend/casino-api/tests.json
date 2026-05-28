@@ -1,20 +1,38 @@
 {
   "tests": [
     {
-      "name": "Health check",
-      "method": "GET",
+      "name": "Ping",
+      "method": "POST",
       "path": "/",
+      "body": {"action": "ping"},
       "expectedStatus": 200,
+      "expectedBody": {"status": "ok"},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Register new user",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "register"},
+      "expectedStatus": 200,
+      "expectedBody": {"balance": 50.0},
       "bodyMatcher": "partial"
     },
     {
       "name": "Admin login success",
       "method": "POST",
       "path": "/",
-      "headers": {"X-Action": "admin_login"},
-      "body": {"password": "2007qwerQ"},
+      "body": {"action": "admin_login", "password": "2007qwerQ"},
       "expectedStatus": 200,
       "expectedBody": {"access": true},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Admin login fail",
+      "method": "POST",
+      "path": "/",
+      "body": {"action": "admin_login", "password": "wrong"},
+      "expectedStatus": 403,
       "bodyMatcher": "partial"
     }
   ]
