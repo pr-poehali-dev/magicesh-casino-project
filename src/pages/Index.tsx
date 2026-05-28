@@ -160,7 +160,7 @@ export default function Index() {
                 className="w-full flex items-center gap-3 px-3 py-3 text-sm font-oswald"
                 style={{ color: page === item.id ? "var(--gold)" : "#888" }}
               >
-                <Icon name={item.icon as any} size={16} />
+                <Icon name={item.icon as "Home"} size={16} />
                 {item.label}
               </button>
             ))}
@@ -559,7 +559,7 @@ export default function Index() {
             className="flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all"
             style={{ color: page === item.id ? "var(--gold)" : "#555" }}
           >
-            <Icon name={item.icon as any} size={18} />
+            <Icon name={item.icon as "Home"} size={18} />
             <span className="text-xs font-oswald">{item.label}</span>
           </button>
         ))}
